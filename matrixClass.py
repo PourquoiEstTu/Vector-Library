@@ -1,8 +1,7 @@
 from vectorClass import Vector as v
 
 class DimensionError(Exception) :
-    def __init__(self) :
-        super().__init__("The vectors in your matrix do not have the same dimensions. Each vector in a matrix should have the same dimensions.")
+    pass
 
 class SingleVectorError(Exception) :
     def __init__(self) :
@@ -24,35 +23,61 @@ class Matrix(v) :
             if type(l) != list :
                 raise TypeError
 
-            #checks whether the members of l are vectors 
-            for i in range( len(l) ) :
-                if not ( isinstance(l[i], v) ) :
-                    raise TypeError
+            if len(l) == 0 :
+                self.matrix = l
+                self.emptyMatrix = True
+            else :
 
-            #checks to see if a single vector was entered inside a list. 
-            #this check is done after the loop so that it is confirmed that
-            # vectors have actually been entered.
-            if len(l) == 1 :
-                raise SingleVectorError
+                #checks whether the members of l are vectors 
+                for i in range( len(l) ) :
+                    if not ( isinstance(l[i], v) ) :
+                        raise TypeError
+
+                #checks to see if a single vector was entered inside a list. 
+                #this check is done after the loop so that it is confirmed that
+                # vectors have actually been entered.
+                if len(l) == 1 :
+                    raise SingleVectorError
         
-            #checks if all the vectors are the same size
-            first_elem_size = l[0].dim()
-            for i in range(1, len(l) ) :
-                if l[i].dim() != first_elem_size :
-                    raise DimensionError
+                #checks if all the vectors are the same size
+                first_elem_size = l[0].dim()
+                for i in range(1, len(l) ) :
+                    if l[i].dim() != first_elem_size :
+                        raise DimensionError
 
-            self.matrix = l
-            self.oneDimMatrix = False
+                self.matrix = l
+                self.oneDimMatrix = False
     
-    def dim(self) :
+    def coordDim(self) :
         """Returns the dimension of the matrix in a tuple. The first value is the number of rows. The second number is the number of columns. For a more English/math representation, call strDim() instead."""
+
         if self.oneDimMatrix == True :
             return ( self.matrix.dim(), 1 )
 
         return ( self.matrix[0].dim(), len(self.matrix) )
 
-    def strDim(self) :
-        return "This is a " + str( self.dim()[0] ) + " row by " + str( self.dim()[1] ) + " column matrix."
+    def longDim(self) :
+        """Returns the dimension of the matrix in a longer, more detailed form. """
 
-    def matrixMult(self, other) :
-        return True 
+        return "This is a " + str( self.coordDim()[0] ) + " row by " + str( self.coordDim()[1] ) + " column matrix."
+
+    def dim(self) :
+        """Returns the dimension of the matrix in standard mathematical notation where the first number signifies rows and the second signifies columns."""
+
+        return str( self.coordDim()[0] ) + "\u00D7" + str( self.coordDim()[1] )
+
+    def __getitem__(self, x, y) :
+        if (x < 0) or (x >= self.coordDim()[1] ) :
+            raise IndexError 
+        if (y < 0 ) or (y >= self.coordDim()[0]) :
+            raise IndexError
+
+    def __mul__(self, other) :
+        if (not (isinstance(other, Matrix)) ) :
+            raise TypeError
+
+        if self.coordDim()[1] != other.coordDim()[0] :
+            print("For matrix multiplication, the number of columns in the first matrix must be the same as the number of rows in the secondmatrix.")
+            raise DimensionError
+
+        new = Matrix([])
